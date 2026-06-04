@@ -570,7 +570,9 @@ i {
   max-width: 100%;
   object-fit: contain;
 }
-
+.partners-grid .partner-card:first-child .partner-logo {
+  padding: 10px;
+}
 /* Price Section */
 .price-section {
   background-color: var(--white);
