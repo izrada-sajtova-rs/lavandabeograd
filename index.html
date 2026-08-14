@@ -170,22 +170,18 @@
 <!-- Google tag: Google Analytics 4 + Google Ads -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FERK45RCCM"></script>
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-
-  gtag('js', new Date());
-
-  /* Google Analytics 4 — Lavanda */
-  gtag('config', 'G-FERK45RCCM');
-
-  /* Google Ads */
-  gtag('config', 'AW-17065093330');
-
-  /* Google Ads conversion: Pozivi za lavandu */
   function gtag_report_conversion(url) {
-    var callback = function () {
+    let navigated = false;
+
+    const callback = function () {
+      if (navigated) {
+        return;
+      }
+
+      navigated = true;
+
       if (typeof url !== 'undefined') {
-        window.location = url;
+        window.location.href = url;
       }
     };
 
