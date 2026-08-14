@@ -321,7 +321,7 @@ muteBtn.addEventListener('click', () => {
 
 // Praćenje klikova na .trackcall dugmad - slanje na eksterni server
 document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".trackcall").forEach(function (el) {
+  document.querySelectorAll(".trackcall1").forEach(function (el) {
     el.addEventListener("click", function () {
       const payload = JSON.stringify({
         time: new Date().toISOString(),
