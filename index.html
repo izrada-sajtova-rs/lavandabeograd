@@ -167,32 +167,37 @@
 }
 </script>
 
-  <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-17065093330"></script>
+<!-- Google tag: Google Analytics 4 + Google Ads -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-FERK45RCCM"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
+
   gtag('js', new Date());
 
+  /* Google Analytics 4 — Lavanda */
+  gtag('config', 'G-FERK45RCCM');
+
+  /* Google Ads */
   gtag('config', 'AW-17065093330');
-</script>
-  <!-- Event snippet for Pozivi za lavandu conversion page
-In your html page, add the snippet and call gtag_report_conversion when someone clicks on the chosen link or button. -->
-<script>
-function gtag_report_conversion(url) {
-  var callback = function () {
-    if (typeof(url) != 'undefined') {
-      window.location = url;
-    }
-  };
-  gtag('event', 'conversion', {
+
+  /* Google Ads conversion: Pozivi za lavandu */
+  function gtag_report_conversion(url) {
+    var callback = function () {
+      if (typeof url !== 'undefined') {
+        window.location = url;
+      }
+    };
+
+    gtag('event', 'conversion', {
       'send_to': 'AW-17065093330/L4R8CJK1t8QaENLRosk_',
       'value': 1.0,
       'currency': 'RSD',
       'event_callback': callback
-  });
-  return false;
-}
+    });
+
+    return false;
+  }
 </script>
 
 </head>
