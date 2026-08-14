@@ -167,35 +167,15 @@
 }
 </script>
 
-<!-- Google tag: Google Analytics 4 + Google Ads -->
+<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-FERK45RCCM"></script>
 <script>
-  function gtag_report_conversion(url) {
-    let navigated = false;
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
 
-    const callback = function () {
-      if (navigated) {
-        return;
-      }
-
-      navigated = true;
-
-      if (typeof url !== 'undefined') {
-        window.location.href = url;
-      }
-    };
-
-    gtag('event', 'conversion', {
-      'send_to': 'AW-17065093330/L4R8CJK1t8QaENLRosk_',
-      'value': 1.0,
-      'currency': 'RSD',
-      'event_callback': callback
-    });
-
-    return false;
-  }
+  gtag('config', 'G-FERK45RCCM');
 </script>
-
 </head>
 <body>
   <!-- Preloader -->
