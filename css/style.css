@@ -146,51 +146,6 @@ i {
   background: var(--lavender-300);
 }
 
-/* Preloader */
-#preloader {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: var(--white);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 9999;
-}
-
-.loader {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.lavender-icon {
-  animation: pulse 1.5s infinite ease-in-out;
-}
-
-@keyframes pulse {
-  0% {
-    transform: scale(0.95);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.05);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(0.95);
-    opacity: 0.7;
-  }
-}
-
-.loader p {
-  margin-top: 1rem;
-  color: var(--lavender-600);
-  font-weight: 500;
-}
-
 /* Utility klase */
 .container {
   width: 100%;
@@ -782,7 +737,6 @@ i {
 
 .testimonials-slider {
   position: relative;
-  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -904,7 +858,6 @@ i {
 }
 
 .faq-container {
-  max-width: 800px;
   margin: 0 auto;
 }
 
@@ -1410,4 +1363,578 @@ i {
 .trackcall svg,
 .trackcall svg * {
   pointer-events: none;
+}
+
+/* Manja slika na vrhu stranice biljke */
+.plant-hero-image img.img-small {
+  object-fit: contain;
+  padding: 14%;
+}
+
+/* Slika na kartici koja treba da stane cela, bez odsecanja */
+.product-image img.img-contain {
+  object-fit: contain;
+}
+
+/* Ikonice brojača (inline SVG) */
+.counter-icon svg {
+  box-sizing: content-box;
+  display: block;
+  margin: 0 auto 15px;
+  padding: 30px;
+  border-radius: 50%;
+  background: #f0e6ff;
+  color: var(--lavender-600);
+  box-shadow: 0 4px 12px rgba(150, 116, 212, 0.2);
+}
+
+/* Dugmad za poziv i Viber */
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-chat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.4rem;
+  color: var(--white);
+}
+
+.btn-viber {
+  background-color: #7360f2;
+}
+
+.btn-chat:hover {
+  filter: brightness(0.92);
+}
+
+/* Vidljiv fokus pri kretanju tastaturom */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid var(--lavender-600);
+  outline-offset: 3px;
+}
+
+/* Na telefonu nema muzičkog plejera */
+@media (max-width: 767px) {
+  .music-player {
+    display: none;
+  }
+
+  .call-button {
+    bottom: 20px;
+  }
+
+  .bottom-gap {
+    display: none;
+  }
+}
+
+/* Ponuda - kartice biljaka i sezona */
+.section-lead {
+  text-align: center;
+  max-width: 760px;
+  margin: -2rem auto 3rem;
+  color: var(--lavender-700);
+}
+
+.season-badge {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.3rem 0.8rem;
+  border-radius: 9999px;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  background-color: rgba(255, 255, 255, 0.94);
+  color: var(--lavender-800);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+.season-badge.in-season {
+  background-color: #15803d;
+  color: var(--white);
+}
+
+.season-badge.season-inline {
+  position: static;
+  display: inline-block;
+  box-shadow: none;
+  background-color: var(--lavender-200);
+}
+
+.season-badge.season-inline.in-season {
+  background-color: #15803d;
+}
+
+.image-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 8rem;
+  font-size: 4.5rem;
+  background: linear-gradient(135deg, var(--lavender-100) 0%, var(--lavender-200) 100%);
+}
+
+.price-unit {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--lavender-600);
+}
+
+.featured-product {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  background-color: var(--lavender-50);
+  border-radius: var(--radius);
+  border-left: 4px solid var(--lavender-600);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.featured-product-image {
+  position: relative;
+  border-radius: var(--radius);
+  overflow: hidden;
+  min-height: 14rem;
+}
+
+.featured-product-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.featured-product-body {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.9rem;
+}
+
+.featured-product-body .product-title {
+  font-size: 1.8rem;
+  margin-bottom: 0;
+}
+
+.featured-label {
+  font-size: 0.7rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--lavender-600);
+}
+
+.featured-text {
+  color: var(--lavender-700);
+}
+
+.plant-card {
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.plant-card:hover {
+  box-shadow: 0 10px 24px rgba(76, 29, 149, 0.12);
+}
+
+.plant-card .product-image {
+  position: relative;
+}
+
+.plant-card .product-description {
+  height: auto;
+  flex: 1;
+}
+
+.plant-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.plant-card-more {
+  font-size: 0.72rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--lavender-600);
+}
+
+/* Kalendar sezone */
+.season-calendar {
+  margin-top: 3rem;
+  background-color: var(--lavender-50);
+  border-radius: var(--radius);
+  padding: 2rem 1.5rem;
+}
+
+.season-calendar .subsection-title,
+.season-note {
+  text-align: center;
+}
+
+.season-note {
+  color: var(--lavender-600);
+  margin-bottom: 1.5rem;
+}
+
+.season-table {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.season-row {
+  display: grid;
+  grid-template-columns: minmax(6.5rem, 10rem) repeat(12, 1fr);
+  gap: 3px;
+  align-items: center;
+  margin-bottom: 3px;
+}
+
+.season-row > span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 1.6rem;
+  border-radius: 4px;
+  background-color: var(--white);
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: var(--lavender-600);
+}
+
+.season-row > .season-name {
+  display: block;
+  height: auto;
+  background: none;
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: var(--lavender-900);
+}
+
+.season-row > a.season-name:hover {
+  text-decoration: underline;
+}
+
+.season-row > .on {
+  background-color: var(--lavender-600);
+}
+
+.season-row > .half {
+  background: linear-gradient(90deg, var(--white) 50%, var(--lavender-600) 50%);
+}
+
+.season-head > span {
+  background: none;
+}
+
+.season-head > .now {
+  background-color: var(--lavender-900);
+  color: var(--white);
+}
+
+/* Stranice biljaka */
+.breadcrumb {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 0.75rem;
+  color: var(--lavender-600);
+  margin-bottom: 2rem;
+}
+
+.breadcrumb span {
+  margin: 0 0.4rem;
+}
+
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+.plant-hero {
+  background-color: var(--lavender-50);
+  padding: 2rem 0 4rem;
+}
+
+.plant-hero-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: center;
+}
+
+.plant-hero-image {
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  aspect-ratio: 4 / 3;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(76, 29, 149, 0.18);
+}
+
+.plant-hero-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.plant-title {
+  font-size: 2.3rem;
+  font-weight: 300;
+  margin: 0.9rem 0 1rem;
+  background: linear-gradient(90deg, rgba(76,29,149,1) 0%, rgba(76,29,149,1) 69%, rgba(173,0,233,1) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.plant-lead {
+  font-size: 0.92rem;
+  color: var(--lavender-700);
+  margin-bottom: 1.5rem;
+}
+
+.plant-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.plant-fact {
+  background-color: var(--white);
+  border-left: 3px solid var(--lavender-600);
+  border-radius: 0.6rem;
+  padding: 0.8rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.plant-fact-label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--lavender-600);
+}
+
+.plant-fact-value {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--lavender-900);
+}
+
+.plant-details {
+  padding: 4rem 0;
+  background-color: var(--white);
+}
+
+.plant-details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.plant-info-card {
+  background-color: var(--lavender-50);
+  border-top: 3px solid var(--lavender-600);
+  border-radius: var(--radius);
+  padding: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.plant-info-card h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--lavender-800);
+  margin-bottom: 1rem;
+}
+
+.plant-info-card p {
+  color: var(--lavender-700);
+  margin-bottom: 0.75rem;
+}
+
+.plant-info-card ul {
+  padding-left: 1.1rem;
+  color: var(--lavender-700);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 300;
+  font-size: 0.85rem;
+}
+
+.plant-info-card li {
+  margin-bottom: 0.6rem;
+}
+
+.plant-photos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.plant-photos img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  border-radius: var(--radius);
+}
+
+.plant-order {
+  padding: 4rem 0;
+  background-color: var(--lavender-100);
+}
+
+.order-steps {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+
+.order-step {
+  background-color: var(--white);
+  border-radius: var(--radius);
+  padding: 1.75rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.order-step-number {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.3rem;
+  height: 2.3rem;
+  margin-bottom: 0.9rem;
+  border-radius: 50%;
+  background-color: var(--lavender-600);
+  color: var(--white);
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 600;
+}
+
+.order-step h3 {
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--lavender-800);
+  margin-bottom: 0.5rem;
+}
+
+.order-step p {
+  color: var(--lavender-700);
+}
+
+.plant-order-cta {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 2.5rem;
+}
+
+.other-plants {
+  padding: 4rem 0 6rem;
+  background-color: var(--white);
+}
+
+.other-plants-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.other-plant {
+  display: block;
+  background-color: var(--lavender-50);
+  border-radius: var(--radius);
+  overflow: hidden;
+  text-align: center;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease;
+}
+
+.other-plant:hover {
+  transform: translateY(-0.25rem);
+}
+
+.other-plant-image {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+}
+
+.other-plant-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.other-plant-image .image-placeholder {
+  font-size: 3rem;
+}
+
+.other-plant-name {
+  display: block;
+  padding: 0.7rem 0.5rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--lavender-800);
+}
+
+/* Na stranicama biljaka nema muzičkog plejera ispod dugmeta */
+.call-button-low {
+  bottom: 20px;
+}
+
+@media (min-width: 768px) {
+  .featured-product {
+    grid-template-columns: 1fr 1.2fr;
+    gap: 2.5rem;
+    padding: 2rem;
+  }
+
+  .plant-hero-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+  }
+
+  .plant-title {
+    font-size: 3rem;
+  }
+
+  .plant-details-grid,
+  .order-steps,
+  .other-plants-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .plant-photos {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .other-plants-grid {
+    grid-template-columns: repeat(6, 1fr);
+  }
 }
