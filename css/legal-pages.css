@@ -5,7 +5,7 @@
 }
 
 .legal-title {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Cormorant Garamond', serif;
   font-size: 2.5rem;
   color: var(--lavender-800);
   text-align: center;
@@ -33,7 +33,7 @@
 }
 
 .legal-block h2 {
-  font-family: 'Playfair Display', serif;
+  font-family: 'Cormorant Garamond', serif;
   font-size: 1.5rem;
   color: var(--lavender-700);
   margin-bottom: 1rem;
