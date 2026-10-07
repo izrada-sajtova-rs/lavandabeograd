@@ -1,13 +1,36 @@
-// Preloader
+// Dolazak sa druge stranice na sekciju (npr. /#placanje): skroluj ponovo kada se sve učita
 window.addEventListener('load', function() {
-  const preloader = document.getElementById('preloader');
-  setTimeout(() => {
-    preloader.style.opacity = '0';
-    setTimeout(() => {
-      preloader.style.display = 'none';
-    }, 500);
-  }, 1000);
-  preloader.style.transition = 'opacity 0.5s ease';
+  if (window.location.hash.length > 1) {
+    const target = document.getElementById(decodeURIComponent(window.location.hash.slice(1)));
+    if (target) {
+      window.scrollTo({
+        top: target.getBoundingClientRect().top + window.pageYOffset - 80,
+        behavior: 'instant'
+      });
+    }
+  }
+});
+
+// Email adresa se sklapa ovde da ne stoji ispisana u HTML-u
+const contactForm = document.getElementById('contact-form');
+if (contactForm) {
+  contactForm.action = 'https://formsubmit.co/' + contactForm.dataset.user + '@' + contactForm.dataset.domain;
+}
+
+document.querySelectorAll('.email-link').forEach(link => {
+  const address = link.dataset.user + '@' + link.dataset.domain;
+  link.href = 'mailto:' + address;
+  link.textContent = address;
+});
+
+// Enter i razmak aktiviraju elemente sa role="button"
+document.querySelectorAll('[role="button"]').forEach(el => {
+  el.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      el.click();
+    }
+  });
 });
 
 // Mobile menu toggle
@@ -120,18 +143,18 @@ window.addEventListener('load', startCountersOnScroll);
 
 // Lightbox galerija
 const galleryImages = [
-  '../slike/lavanda-9.jpg',
-  '../slike/lavanda-7.jpg',
-  '../slike/lavanda-4.jpg',
-  '../slike/lavanda-5.jpg',
-  '../slike/lavanda-2.jpg',
-  '../slike/lavanda-10.jpg',
-  '../slike/lavanda-3.jpg',
-  '../slike/majcina-dusica-2.jpg',
-  '../slike/nana-1.jpg',
-  '../slike/macina-dusica-1.jpg',
-  '../slike/ruzmarin-1.jpg',
-  '../slike/sumske-jagode-1.jpg'
+  'slike/lavanda-vezice-na-stolu-velika.webp',
+  'slike/lavanda-u-basti-velika.webp',
+  'slike/lavanda-cvetovi-izbliza-velika.webp',
+  'slike/bumbar-na-lavandi-velika.webp',
+  'slike/lavanda-2.webp',
+  'slike/ubrana-lavanda-velika.webp',
+  'slike/zbun-lavande-velika.webp',
+  'slike/majcina-dusica-2.webp',
+  'slike/nana-1.webp',
+  'slike/macina-dusica-1.webp',
+  'slike/ruzmarin-1.webp',
+  'slike/sumske-jagode-1.webp'
 ];
 
 let currentImageIndex = 0;
@@ -215,13 +238,16 @@ function currentTestimonial(index) {
   showTestimonial(currentTestimonialIndex);
 }
 
-// Inicijalno prikazivanje prvog testimoniala
-showTestimonial(0);
+// Sektor utisaka može biti zakomentarisan u HTML-u
+if (testimonialSlides.length) {
+  // Inicijalno prikazivanje prvog testimoniala
+  showTestimonial(0);
 
-// Auto-rotacija testimoniala
-setInterval(() => {
-  moveTestimonial(1);
-}, 5000);
+  // Auto-rotacija testimoniala
+  setInterval(() => {
+    moveTestimonial(1);
+  }, 5000);
+}
 
 // FAQ Accordion
 const faqItems = document.querySelectorAll('.faq-item');
@@ -231,12 +257,14 @@ faqItems.forEach(item => {
   
   question.addEventListener('click', () => {
     // Toggle active klase na kliknutom pitanju
-    item.classList.toggle('active');
-    
+    const isOpen = item.classList.toggle('active');
+    question.setAttribute('aria-expanded', isOpen);
+
     // Opciono: zatvaranje ostalih otvorenih pitanja
     faqItems.forEach(otherItem => {
       if (otherItem !== item && otherItem.classList.contains('active')) {
         otherItem.classList.remove('active');
+        otherItem.querySelector('.faq-question').setAttribute('aria-expanded', 'false');
       }
     });
   });
@@ -272,6 +300,7 @@ audioPlayer.addEventListener('timeupdate', () => {
   progressFill.style.width = `${progress}%`;
   
   // Ažuriranje vremena
+  if (!currentTimeDisplay) return;
   const currentMinutes = Math.floor(audioPlayer.currentTime / 60);
   const currentSeconds = Math.floor(audioPlayer.currentTime % 60);
   currentTimeDisplay.textContent = `${currentMinutes}:${currentSeconds < 10 ? '0' : ''}${currentSeconds}`;
@@ -279,6 +308,7 @@ audioPlayer.addEventListener('timeupdate', () => {
 
 // Postavljanje trajanja kada se učita audio
 audioPlayer.addEventListener('loadedmetadata', () => {
+  if (!durationDisplay) return;
   const durationMinutes = Math.floor(audioPlayer.duration / 60);
   const durationSeconds = Math.floor(audioPlayer.duration % 60);
   durationDisplay.textContent = `${durationMinutes}:${durationSeconds < 10 ? '0' : ''}${durationSeconds}`;
@@ -321,8 +351,13 @@ muteBtn.addEventListener('click', () => {
 
 // Praćenje klikova na .trackcall dugmad - slanje na eksterni server
 document.addEventListener("DOMContentLoaded", function () {
-  document.querySelectorAll(".trackcall1").forEach(function (el) {
+  document.querySelectorAll(".trackcall").forEach(function (el) {
     el.addEventListener("click", function () {
+      // Google Analytics događaj
+      if (typeof gtag === "function") {
+        gtag("event", "phone_call_click", { link_url: el.getAttribute("href") });
+      }
+
       const payload = JSON.stringify({
         time: new Date().toISOString(),
         call: 1
