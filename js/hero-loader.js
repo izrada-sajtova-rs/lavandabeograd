@@ -1,4 +1,4 @@
-// Preuzimanje i inicijalizacija GPU animacije tek dve sekunde nakon load dogadjaja.
+// Preuzimanje i inicijalizacija GPU animacije tek tri sekunde nakon load dogadjaja.
 (() => {
   const stage = document.querySelector('.hero-lavender');
   const photo = stage && stage.querySelector('.hero-lavender-base');
@@ -36,7 +36,7 @@
     document.body.append(script);
   }
   function schedule() {
-    if (!cancelled) timer = setTimeout(load, 2000);
+    if (!cancelled) timer = setTimeout(load, 3000);
   }
   if (document.readyState === 'complete') schedule();
   else window.addEventListener('load', schedule, { once: true });
