@@ -280,6 +280,13 @@ const currentTimeDisplay = document.querySelector('.current-time');
 const durationDisplay = document.querySelector('.duration');
 const volumeSlider = document.getElementById('volume-slider');
 const muteBtn = document.getElementById('mute-btn');
+// Svetla popuna prati stvarnu jacinu, ukljucujuci mute i ponovno ukljucivanje.
+const updateVolumeTrack = () => {
+  volumeSlider.style.setProperty('--volume-progress', `${audioPlayer.volume * 100}%`);
+};
+audioPlayer.volume = Number(volumeSlider.value);
+updateVolumeTrack();
+audioPlayer.addEventListener('volumechange', updateVolumeTrack);
 audioPlayer.loop = true;
 // Play/Pause funkcionalnost
 playPauseBtn.addEventListener('click', () => {
