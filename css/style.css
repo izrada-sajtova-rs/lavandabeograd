@@ -379,6 +379,7 @@ i {
 
 /* Hero Section */
 .hero-section {
+  background-color: var(--white);
   position: relative;
   padding: 5rem 0 5rem;
   text-align: left;
@@ -407,6 +408,36 @@ i {
   align-items: center;
   justify-content: center;
  }
+/* Zadrzana velicina vezice; blago stapanje svetle JPG pozadine sa belim hero delom. */
+.hero-lavender {
+  position: relative;
+  display: block;
+  width: 669px;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  -webkit-tap-highlight-color: transparent;
+}
+/* Platno pokriva vidljivi prozor: latice nisu odsecene granicama fotografije. */
+.hero-lavender-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 3;
+  pointer-events: none;
+}
+.hero-img img {
+  display: block;
+  width: 669px;
+  max-width: 100%;
+  height: auto;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent), linear-gradient(to bottom, transparent, #000 4%, #000 96%, transparent);
+  mask-composite: intersect;
+}
 .hero-content {
   position: relative;
   z-index: 1;
@@ -417,7 +448,7 @@ i {
 }
 
 .hero-title {
-  font-size: 2.5rem;
+  font-size: 2.7rem;
   color: var(--lavender-900);
   margin-bottom: 1.5rem;
   background: linear-gradient(90deg, rgba(76,29,149,1) 0%, rgba(76,29,149,1) 69%, rgba(173,0,233,1) 100%);
@@ -432,6 +463,34 @@ i {
   margin-bottom: 2rem;
   max-width: 600px;
   font-weight: 300;
+}
+
+/* About Section */
+.home-page {
+  overflow-x: clip;
+}
+.intro-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+.intro-letter {
+  display: inline-block;
+}
+.hero-title span,
+.hero-text span {
+  font-family: inherit;
+  font-weight: inherit;
+  font-style: inherit;
+  letter-spacing: inherit;
+}
+.intro-readable {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* About Section */
@@ -1211,6 +1270,21 @@ i {
   transform: scale(1.1);
 }
 
+.call-after-hero {
+  transition: opacity 0.35s ease, transform 0.35s ease, visibility 0.35s;
+}
+.call-after-hero:not(.is-visible) {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(12px);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .call-after-hero {
+    transition: none;
+  }
+}
+
 /* Music Player */
 .music-player {
   position: fixed;
@@ -1304,23 +1378,53 @@ i {
 }
 
 #volume-slider {
+  --volume-progress: 70%;
+  -webkit-appearance: none;
+  appearance: none;
   width: 80px;
-  height: 2px;
-  /* -webkit-appearance: none; */
-  background-color: var(--lavender-300);
-  border-radius: 2px;
-  outline: none;
-  box-shadow: inset 0 1px 5px rgba(0, 0, 0, 0.2);
-
+  height: 24px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  accent-color: var(--lavender-200);
 }
-
+#volume-slider::-webkit-slider-runnable-track {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(to right, var(--lavender-200) var(--volume-progress), rgba(221, 214, 254, 0.35) var(--volume-progress));
+}
 #volume-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 4px;
-  height: 4px;
+  appearance: none;
+  width: 8px;
+  height: 8px;
+  margin-top: -3px;
+  border: 0;
   border-radius: 50%;
-  background-color: var(--white);
-  cursor: pointer;
+  background: var(--lavender-200);
+}
+#volume-slider::-moz-range-track {
+  height: 2px;
+  border-radius: 2px;
+  background: rgba(221, 214, 254, 0.35);
+}
+#volume-slider::-moz-range-progress {
+  height: 2px;
+  border-radius: 2px;
+  background: var(--lavender-200);
+}
+#volume-slider::-moz-range-thumb {
+  width: 8px;
+  height: 8px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--lavender-200);
+}
+#volume-slider:focus-visible {
+  outline: 2px solid var(--lavender-200);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 .bottom-gap {
   height: 20px;
@@ -1346,7 +1450,7 @@ i {
   }
 
   .hero-title {
-    font-size: 3.5rem;
+    font-size: 3.75rem;
   }
 .hero-section {
   flex-direction: row;
@@ -1459,6 +1563,25 @@ button:focus-visible,
 
 /* Na telefonu nema muzičkog plejera */
 @media (max-width: 767px) {
+  .hero-title {
+    line-height: 1.1;
+  }
+  .hero-section {
+    height: auto;
+    min-height: calc(100svh - 4rem);
+    padding: 2.5rem 0 3rem;
+    gap: 1.5rem;
+  }
+  .hero-content > .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 52px;
+    padding: 16px 20px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
   .music-player {
     display: none;
   }
