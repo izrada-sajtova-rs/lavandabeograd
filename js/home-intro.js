@@ -58,8 +58,8 @@
         if (side === 2) y = -rect.bottom - 50;
         if (side === 3) y = window.innerHeight - rect.top + 50;
         return { letter, x, y, rotation: ((i * 29) % 91) - 45,
-          delay: (group.title ? 100 : 380) + ((i * 47) % 850),
-          duration: group.title ? 2300 : 2500 };
+          delay: ((group.title ? 100 : 380) + ((i * 47) % 850)) * 0.8,
+          duration: group.title ? 1840 : 2000 };
       }));
       for (const flight of flights) {
         animations.push(flight.letter.animate([

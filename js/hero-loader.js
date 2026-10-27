@@ -25,7 +25,7 @@
     }
     requested = true;
     const script = document.createElement('script');
-    script.src = 'js/hero-lavender.js?v=20261027-perf2';
+    script.src = 'js/hero-lavender.js?v=20261027-speed1';
     script.async = true;
     script.onerror = cancel;
     script.onload = () => {
