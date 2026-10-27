@@ -165,7 +165,7 @@
       gl.clearColor(0, 0, 0, 0);
       canvas.hidden = false;
       stage.classList.add('is-forming');
-      const duration = 2600;
+      const duration = 4600;
       let began, previous = -Infinity;
       function draw(now) {
         if (done) return;
