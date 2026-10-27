@@ -1,14 +1,20 @@
 // Jedan GPU poziv po kadru umesto hiljada canvas clip/drawImage operacija.
 (() => {
   const photo = document.querySelector('.hero-lavender-base');
+  const stage = photo && photo.closest('.hero-lavender');
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (!photo || motion.matches) return;
+  if (!photo || !stage || !stage.classList.contains('is-pending')) return;
+  const revealPhoto = () => {
+    photo.style.visibility = '';
+    stage.classList.remove('is-pending', 'is-forming');
+  };
+  if (motion.matches) { revealPhoto(); return; }
   const canvas = document.createElement('canvas');
   canvas.className = 'hero-lavender-canvas';
   canvas.setAttribute('aria-hidden', 'true');
   const gl = canvas.getContext('webgl', { alpha: true, antialias: false,
     depth: false, stencil: false, premultipliedAlpha: true, powerPreference: 'low-power' });
-  if (!gl) return; // Obicna fotografija ostaje vidljiva bez GPU podrske.
+  if (!gl) { revealPhoto(); return; }
   document.body.append(canvas);
   canvas.hidden = true;
   photo.style.visibility = 'hidden';
@@ -19,7 +25,7 @@
     if (done) return;
     done = true;
     cancelAnimationFrame(frame);
-    photo.style.visibility = '';
+    revealPhoto();
     if (buffer) gl.deleteBuffer(buffer);
     if (texture) gl.deleteTexture(texture);
     if (program) gl.deleteProgram(program);
@@ -158,6 +164,7 @@
       gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
       gl.clearColor(0, 0, 0, 0);
       canvas.hidden = false;
+      stage.classList.add('is-forming');
       const duration = 4600;
       let began, previous = -Infinity;
       function draw(now) {
