@@ -420,6 +420,70 @@ i {
   -webkit-tap-highlight-color: transparent;
 }
 /* Platno pokriva vidljivi prozor: latice nisu odsecene granicama fotografije. */
+.hero-preview {
+  display: none;
+  position: absolute;
+  inset: 0;
+  place-items: center;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.hero-lavender.is-pending .hero-lavender-base {
+  visibility: hidden;
+}
+.hero-lavender.is-pending .hero-preview {
+  display: grid;
+}
+.hero-lavender.is-forming .hero-preview {
+  opacity: 0;
+}
+.hero-lavender.is-forming .hero-preview-flower {
+  animation-play-state: paused;
+}
+.hero-preview-flower {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  border: 1px solid var(--lavender-100);
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--lavender-50), #fff 72%);
+  animation: lavender-preview-breathe 2.4s ease-in-out infinite;
+}
+.hero-preview-flower::after {
+  content: '';
+  position: absolute;
+  top: 75px;
+  left: 79px;
+  width: 2px;
+  height: 49px;
+  border-radius: 2px;
+  background: var(--lavender-300);
+}
+.hero-preview-petal {
+  position: absolute;
+  top: 42px;
+  left: 68px;
+  width: 24px;
+  height: 48px;
+  border-radius: 80% 20% 75% 25%;
+  background: var(--lavender-300);
+  transform-origin: 50% 100%;
+}
+.hero-preview-petal:first-child {
+  transform: rotate(-42deg);
+  background: var(--lavender-200);
+}
+.hero-preview-petal:last-child {
+  transform: rotate(42deg);
+  background: var(--lavender-400);
+}
+@keyframes lavender-preview-breathe {
+  0%, 100% { transform: translateY(2px) scale(0.98); }
+  50% { transform: translateY(-2px) scale(1.02); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-preview-flower { animation: none; }
+}
 .hero-lavender-canvas {
   position: fixed;
   inset: 0;
