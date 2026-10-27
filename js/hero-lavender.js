@@ -1,88 +1,112 @@
-// Jednokratno sklapanje cele JPG fotografije iz teksturisanih latica.
+// Jedan GPU poziv po kadru umesto hiljada canvas clip/drawImage operacija.
 (() => {
-  const stage = document.querySelector('.hero-lavender');
-  if (!stage) return;
-  const photo = stage.querySelector('.hero-lavender-base');
+  const photo = document.querySelector('.hero-lavender-base');
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  if (!photo || motion.matches || typeof Path2D === 'undefined') return;
+  if (!photo || motion.matches) return;
   const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
   canvas.className = 'hero-lavender-canvas';
   canvas.setAttribute('aria-hidden', 'true');
-  canvas.hidden = true;
+  const gl = canvas.getContext('webgl', { alpha: true, antialias: false,
+    depth: false, stencil: false, premultipliedAlpha: true, powerPreference: 'low-power' });
+  if (!gl) return; // Obicna fotografija ostaje vidljiva bez GPU podrske.
   document.body.append(canvas);
+  canvas.hidden = true;
   photo.style.visibility = 'hidden';
-  let timer = 0, frame = 0, done = false, scheduled = false;
-  const clamp = value => Math.max(0, Math.min(1, value));
-  const ease = t => t * t * (3 - 2 * t);
-  const duration = 4600;
+  let frame = 0, done = false, started = false;
+  let program, buffer, texture;
+  const shaders = [];
   function finish() {
+    if (done) return;
     done = true;
-    clearTimeout(timer);
     cancelAnimationFrame(frame);
     photo.style.visibility = '';
+    if (buffer) gl.deleteBuffer(buffer);
+    if (texture) gl.deleteTexture(texture);
+    if (program) gl.deleteProgram(program);
+    shaders.forEach(shader => gl.deleteShader(shader));
     canvas.remove();
+    const lose = gl.getExtension('WEBGL_lose_context');
+    if (lose) lose.loseContext();
+  }
+  function shader(type, source) {
+    const result = gl.createShader(type);
+    shaders.push(result);
+    gl.shaderSource(result, source);
+    gl.compileShader(result);
+    if (!gl.getShaderParameter(result, gl.COMPILE_STATUS)) throw new Error('Shader compilation failed');
+    return result;
   }
   function start() {
-    if (done) return;
+    if (done || started) return;
+    started = true;
     const bounds = photo.getBoundingClientRect();
     if (motion.matches || document.hidden || !photo.complete || !photo.naturalWidth ||
         !bounds.width || !bounds.height || bounds.bottom <= 0 || bounds.top >= window.innerHeight) {
-      finish();
-      return;
+      finish(); return;
     }
     try {
       const vw = window.innerWidth, vh = window.innerHeight;
-      const dpr = window.devicePixelRatio || 1;
-      // CSS procenat moze iskljuciti sirinu scrollbara, dok innerWidth ukljucuje tu sirinu.
-      // Zato platno ima iste eksplicitne dimenzije kao koordinatni prostor fotografije.
+      const dpr = Math.min(window.devicePixelRatio || 1, vw < 768 ? 1.25 : 1.5);
       canvas.style.width = `${vw}px`;
       canvas.style.height = `${vh}px`;
       canvas.width = Math.round(vw * dpr);
       canvas.height = Math.round(vh * dpr);
-      const pixelScaleX = canvas.width / vw;
-      const pixelScaleY = canvas.height / vh;
-      // Ista meka ivica kao na JPG elementu, da zavrsna zamena ne napravi skok.
-      const texture = document.createElement('canvas');
-      texture.width = photo.naturalWidth;
-      texture.height = photo.naturalHeight;
-      const textureCtx = texture.getContext('2d');
-      if (!textureCtx) { finish(); return; }
-      textureCtx.drawImage(photo, 0, 0);
-      textureCtx.globalCompositeOperation = 'destination-in';
-      for (const [x, y] of [[texture.width, 0], [0, texture.height]]) {
-        const gradient = textureCtx.createLinearGradient(0, 0, x, y);
-        gradient.addColorStop(0, 'transparent');
-        gradient.addColorStop(0.04, '#000');
-        gradient.addColorStop(0.96, '#000');
-        gradient.addColorStop(1, 'transparent');
-        textureCtx.fillStyle = gradient;
-        textureCtx.fillRect(0, 0, texture.width, texture.height);
-      }
+      gl.viewport(0, 0, canvas.width, canvas.height);
+      program = gl.createProgram();
+      const precision = gl.getShaderPrecisionFormat(gl.FRAGMENT_SHADER, gl.HIGH_FLOAT).precision ? 'highp' : 'mediump';
+      gl.attachShader(program, shader(gl.VERTEX_SHADER, `
+        precision highp float;
+        attribute vec2 aCorner, aTarget, aStart, aControl0, aControl1, aTiming;
+        uniform vec2 uViewport, uRadius;
+        uniform vec4 uBounds;
+        uniform float uProgress;
+        varying ${precision} vec2 vCorner, vUV;
+        void main() {
+          float p = clamp((uProgress - aTiming.x) / 0.76, 0.0, 1.0);
+          float t = p * p * (3.0 - 2.0 * p);
+          float u = 1.0 - t;
+          vec2 center = u*u*u*aStart + 3.0*u*u*t*aControl0 + 3.0*u*t*t*aControl1 + t*t*t*aTarget;
+          float angle = aTiming.y * u;
+          float size = 1.0 + sin(t * 3.14159265359) * 0.45;
+          vec2 local = aCorner * uRadius;
+          vec2 rotated = vec2(cos(angle)*local.x - sin(angle)*local.y,
+                              sin(angle)*local.x + cos(angle)*local.y) * size;
+          vec2 point = (center + rotated) / uViewport;
+          gl_Position = vec4(point.x * 2.0 - 1.0, 1.0 - point.y * 2.0, 0.0, 1.0);
+          vCorner = aCorner;
+          vUV = (aTarget - uBounds.xy + local) / uBounds.zw;
+        }
+      `));
+      gl.attachShader(program, shader(gl.FRAGMENT_SHADER, `
+        precision ${precision} float;
+        uniform sampler2D uImage;
+        varying ${precision} vec2 vCorner, vUV;
+        void main() {
+          float edge = 0.8 * (1.0 - vCorner.x * vCorner.x) - abs(vCorner.y);
+          if (edge < 0.0 || min(vUV.x, vUV.y) < 0.0 || max(vUV.x, vUV.y) > 1.0) discard;
+          vec4 color = texture2D(uImage, vUV);
+          vec2 mask = clamp(vUV / 0.04, 0.0, 1.0) * clamp((1.0 - vUV) / 0.04, 0.0, 1.0);
+          float alpha = color.a * mask.x * mask.y * smoothstep(0.0, 0.055, edge);
+          gl_FragColor = vec4(color.rgb * alpha, alpha);
+        }
+      `));
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error('Shader linking failed');
+      gl.useProgram(program);
       const cols = 96, rows = 54;
       const cellW = bounds.width / cols, cellH = bounds.height / rows;
-      // Preklapajuce latice na kraju pokriju svaki piksel, bez rupa izmedju njih.
       const rx = cellW * 1.35, ry = cellH * 1.35;
-      const shape = new Path2D();
-      shape.moveTo(-rx, 0);
-      shape.quadraticCurveTo(0, -ry * 1.6, rx, 0);
-      shape.quadraticCurveTo(0, ry * 1.6, -rx, 0);
-      shape.closePath();
-      // Mapa JPG uzoraka ukljucuje biljku i meku senku; preskace cistu belu pozadinu.
-      const plantCells = atob("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAD8PgAAAAAAAAAAAAD8//8AAAAMAAAAAAD8//8/AMAcwAAAAADg/v//AOAfwAMAgAMA/v//APAfgP8BwD8M/P//A3Af8P8DgP99/v//P3Ae+P8DAP///////+Oe//8DANj///////////8HAMD///////////8PAMD///////////8PAMD9//////////8HQAD8//////////8P4C/+//////////8f4P////////////8fwP////////////8fgP////////////8fgP////////////8fgP////////////8f4P////////////8f8P////////////8f4P////////////8fAO////////////8fAOD///////////8PAOD///////////8HAPj///////////8BAP7///////////8AAP////////////8AgP///////////z8AgP//////////DwAAgP//////////AQAAgP////////+/AQAAAPz///////8PAAAAAP7///////8DAAAAAPj///////8AAAAAAPj//////38AAAAAAPj//////w8AAAAAAMD//////wAAAAAAAADH////DwAAAAAAAACA////BwAAAAAAAAAA/v/DAAAAAAAAAAAA8P8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+      const cells = atob('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAD8PgAAAAAAAAAAAAD8//8AAAAMAAAAAAD8//8/AMAcwAAAAADg/v//AOAfwAMAgAMA/v//APAfgP8BwD8M/P//A3Af8P8DgP99/v//P3Ae+P8DAP///////+Oe//8DANj///////////8HAMD///////////8PAMD///////////8PAMD9//////////8HQAD8//////////8P4C/+//////////8f4P////////////8fwP////////////8fgP////////////8fgP////////////8fgP////////////8f4P////////////8f8P////////////8f4P////////////8fAO////////////8fAOD///////////8PAOD///////////8HAPj///////////8BAP7///////////8AAP////////////8AgP///////////z8AgP//////////DwAAgP//////////AQAAgP////////+/AQAAAPz///////8PAAAAAP7///////8DAAAAAPj///////8AAAAAAPj//////38AAAAAAPj//////w8AAAAAAMD//////wAAAAAAAADH////DwAAAAAAAACA////BwAAAAAAAAAA/v/DAAAAAAAAAAAA8P8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
       const pieces = [];
       let seed = 7381;
       const random = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
       const margin = Math.max(rx, ry) * 5 + 40;
-      const sourceX = photo.naturalWidth / bounds.width;
-      const sourceY = photo.naturalHeight / bounds.height;
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
           const index = row * cols + col;
-          if (!(plantCells.charCodeAt(index >> 3) & (1 << (index & 7)))) continue;
-          const cx = (col + 0.5) * cellW, cy = (row + 0.5) * cellH;
-          const targetX = bounds.left + cx, targetY = bounds.top + cy;
+          if (!(cells.charCodeAt(index >> 3) & (1 << (index & 7)))) continue;
+          const tx = bounds.left + (col + 0.5) * cellW;
+          const ty = bounds.top + (row + 0.5) * cellH;
           const side = Math.floor(random() * 4);
           let sx, sy;
           if (side === 0) { sx = -margin; sy = random() * vh; }
@@ -90,67 +114,76 @@
           else if (side === 2) { sx = random() * vw; sy = -margin; }
           else { sx = random() * vw; sy = vh + margin; }
           const sign = row < rows / 2 ? -1 : 1;
-          const left = Math.max(0, cx - rx), top = Math.max(0, cy - ry);
-          const right = Math.min(bounds.width, cx + rx), bottom = Math.min(bounds.height, cy + ry);
-          pieces.push({ targetX, targetY, sx, sy,
-            ax: sx + (targetX - sx) * 0.25 + (random() - 0.5) * bounds.width,
-            ay: sy + sign * bounds.height * (0.5 + random()),
-            bx: targetX + bounds.width * (0.2 + random() * 0.5),
-            by: targetY - sign * bounds.height * (0.5 + random()),
-            delay: col / cols * 0.16 + random() * 0.08,
-            spin: (random() - 0.5) * Math.PI * 4,
-            source: [left * sourceX, top * sourceY, (right - left) * sourceX, (bottom - top) * sourceY],
-            destination: [left - cx, top - cy, right - left, bottom - top] });
+          pieces.push([tx, ty, sx, sy,
+            sx + (tx - sx) * 0.25 + (random() - 0.5) * bounds.width,
+            sy + sign * bounds.height * (0.5 + random()),
+            tx + bounds.width * (0.2 + random() * 0.5),
+            ty - sign * bounds.height * (0.5 + random()),
+            col / cols * 0.16 + random() * 0.08,
+            (random() - 0.5) * Math.PI * 4]);
         }
       }
+      const corners = [-1,-1, 1,-1, -1,1, -1,1, 1,-1, 1,1];
+      const vertices = new Float32Array(pieces.length * 6 * 12);
+      let offset = 0;
+      for (const piece of pieces) {
+        for (let i = 0; i < 12; i += 2) {
+          vertices[offset++] = corners[i];
+          vertices[offset++] = corners[i + 1];
+          for (const value of piece) vertices[offset++] = value;
+        }
+      }
+      buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+      ['aCorner','aTarget','aStart','aControl0','aControl1','aTiming'].forEach((name, i) => {
+        const location = gl.getAttribLocation(program, name);
+        gl.enableVertexAttribArray(location);
+        gl.vertexAttribPointer(location, 2, gl.FLOAT, false, 48, i * 8);
+      });
+      texture = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, photo);
+      gl.uniform1i(gl.getUniformLocation(program, 'uImage'), 0);
+      gl.uniform2f(gl.getUniformLocation(program, 'uViewport'), vw, vh);
+      gl.uniform2f(gl.getUniformLocation(program, 'uRadius'), rx, ry);
+      gl.uniform4f(gl.getUniformLocation(program, 'uBounds'), bounds.left, bounds.top, bounds.width, bounds.height);
+      const progressLocation = gl.getUniformLocation(program, 'uProgress');
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+      gl.clearColor(0, 0, 0, 0);
       canvas.hidden = false;
-      let began;
+      const duration = 4600;
+      let began, previous = -Infinity;
       function draw(now) {
         if (done) return;
         if (began === undefined) began = now;
-        const progress = clamp((now - began) / duration);
-        ctx.setTransform(pixelScaleX, 0, 0, pixelScaleY, 0, 0);
-        ctx.clearRect(0, 0, vw, vh);
-        try {
-          for (const p of pieces) {
-            const t = ease(clamp((progress - p.delay) / 0.76));
-            const u = 1 - t;
-            const x = u ** 3 * p.sx + 3 * u * u * t * p.ax + 3 * u * t * t * p.bx + t ** 3 * p.targetX;
-            const y = u ** 3 * p.sy + 3 * u * u * t * p.ay + 3 * u * t * t * p.by + t ** 3 * p.targetY;
-            const angle = p.spin * u;
-            const scale = t === 1 ? 1 : 1 + Math.sin(t * Math.PI) * 0.45;
-            const cos = Math.cos(angle) * scale, sin = Math.sin(angle) * scale;
-            ctx.save();
-            ctx.setTransform(pixelScaleX * cos, pixelScaleY * sin,
-              -pixelScaleX * sin, pixelScaleY * cos, pixelScaleX * x, pixelScaleY * y);
-            ctx.clip(shape);
-            // Svaka latica nosi pravi komadic fotografije, ukljucujuci zelene stabljike.
-            ctx.drawImage(texture, ...p.source, ...p.destination);
-            ctx.restore();
-          }
-        } catch {
-          ctx.restore();
-          finish();
-          return;
+        const progress = Math.min(1, (now - began) / duration);
+        // 30 fps je dovoljno za blag pokret, uz prepolovljen broj GPU kadrova.
+        if (now - previous >= 32 || progress === 1) {
+          previous = now;
+          gl.clear(gl.COLOR_BUFFER_BIT);
+          gl.uniform1f(progressLocation, progress);
+          gl.drawArrays(gl.TRIANGLES, 0, pieces.length * 6);
         }
-        // Prvo nacrtaj potpuno sklopljen kadar, pa tek u sledecem kadru zameni platno JPG-om.
         if (progress >= 1) frame = requestAnimationFrame(finish);
         else frame = requestAnimationFrame(draw);
       }
       frame = requestAnimationFrame(draw);
     } catch {
-      finish();
+      finish(); // Ako GPU ili tekstura nisu dostupni, prikazi JPG odmah.
     }
   }
-  function schedule() {
-    if (done || scheduled) return;
-    scheduled = true;
-    start();
-  }
-  if (document.readyState === 'complete') schedule();
-  else window.addEventListener('load', schedule, { once: true });
+  if (document.readyState === 'complete') start();
+  else window.addEventListener('load', start, { once: true });
   window.addEventListener('resize', finish, { passive: true });
   window.addEventListener('scroll', finish, { passive: true });
   motion.addEventListener('change', finish);
+  canvas.addEventListener('webglcontextlost', finish);
   document.addEventListener('visibilitychange', () => { if (document.hidden) finish(); });
 })();
