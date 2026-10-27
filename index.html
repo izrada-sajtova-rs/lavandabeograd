@@ -42,7 +42,9 @@
 
   
   <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css?v=20261027-hero19">
+  <link rel="preload" href="font/cormorant-garamond-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="font/montserrat-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/style.css?v=20261027-perf1">
 
 <script type="application/ld+json">
 {
@@ -214,7 +216,7 @@
       </div>
       <div class="hero-img">
         <div class="hero-lavender">
-          <img class="hero-lavender-base" src="slike/lavanda-beograd-vezica.jpg" width="669" height="373" alt="Vezica sveže lavande - Lavanda Beograd" fetchpriority="high">
+          <img class="hero-lavender-base" src="slike/lavanda-beograd-vezica.jpg" srcset="slike/lavanda-beograd-vezica-800.jpg 800w, slike/lavanda-beograd-vezica.jpg 1376w" sizes="(max-width: 767px) 100vw, (max-width: 1338px) 50vw, 669px" width="669" height="373" alt="Vezica sveže lavande - Lavanda Beograd" fetchpriority="high">
         </div>
       </div>
     </section>
@@ -517,7 +519,7 @@
                   <p>"Vezica lavande stoji u vazi i daje opuštajući miris mom domu. Porodica je jako ljubazna i preporučujem svima!"</p>
                 </div>
                 <div class="testimonial-author">
-                  <img src="slike/person-3.jpg" alt="Marija Perišić" class="testimonial-avatar" loading="lazy">
+                  <img src="slike/person-3.jpg" alt="Marija Perišić" class="testimonial-avatar" loading="lazy" width="80" height="80">
                   <div>
                     <h4 class="testimonial-name">Marija Perišić</h4>
                     <p class="testimonial-location">Beograd</p>
@@ -532,7 +534,7 @@
                   <p>"Poseta domaćinstvu lavande je bilo nezaboravno iskustvo za celu porodicu. Deca su uživala na selu, a mi smo naučili mnogo o uzgoju lavande."</p>
                 </div>
                 <div class="testimonial-author">
-                  <img src="slike/person-4.jpg" alt="Ana Janković" class="testimonial-avatar" loading="lazy">
+                  <img src="slike/person-4.jpg" alt="Ana Janković" class="testimonial-avatar" loading="lazy" width="80" height="80">
                   <div>
                     <h4 class="testimonial-name">Ana Janković</h4>
                     <p class="testimonial-location">Beograd</p>
@@ -547,7 +549,7 @@
                   <p>"Kao vlasnik spa centra, redovno naručujem proizvode od lavande za naše potrebe. Kvalitet je izvanredan, a saradnja sa porodicom Lavanda je uvek prijateljska."</p>
                 </div>
                 <div class="testimonial-author">
-                  <img src="slike/person-5.jpg" alt="Nikola Marković" class="testimonial-avatar" loading="lazy">
+                  <img src="slike/person-5.jpg" alt="Nikola Marković" class="testimonial-avatar" loading="lazy" width="80" height="80">
                   <div>
                     <h4 class="testimonial-name">Nikola Marković</h4>
                     <p class="testimonial-location">Niš</p>
@@ -576,20 +578,20 @@
         <h2 class="section-title animate-on-scroll">Naši Prijatelji</h2>
         <div class="partners-grid">
           <a href="https://izrada-sajtova-rs.com/" target="_blank" rel="noopener noreferrer" class="partner-card animate-on-scroll">
-            <img src="logo/izrada-sajtova-rs.svg" alt="Izrada web sajtova" class="partner-logo" loading="lazy">
+            <img src="logo/izrada-sajtova-rs.svg" alt="Izrada web sajtova" class="partner-logo" loading="lazy" width="1467" height="575">
             <!-- Dimenzije: 160x80 -->
           </a>
           <a href="https://domaca-hrana.com" class="partner-card animate-on-scroll" target="_blank" rel="noopener noreferrer" data-delay="200">
-            <img src="logo/domace-logo.png" alt="Domace kiflice" class="partner-logo" loading="lazy">
+            <img src="logo/domace-logo.png" alt="Domace kiflice" class="partner-logo" loading="lazy" width="180" height="91">
             <!-- Dimenzije: 160x80 -->
           </a>          
           <a href="https://katarinaketering.com/" target="_blank" rel="noopener noreferrer" class="partner-card animate-on-scroll" data-delay="100">
-            <img src="logo/katarina-ketering-logo.png" alt="katarina ketering" class="partner-logo" loading="lazy">
+            <img src="logo/katarina-ketering-logo.png" alt="katarina ketering" class="partner-logo" loading="lazy" width="167" height="120">
             <!-- Dimenzije: 160x80 -->
           </a>
 
           <!-- <a href="" class="partner-card animate-on-scroll" data-delay="300">
-            <img src="logo/katarina-ketering-logo.png" alt="Partner 4" class="partner-logo">
+            <img src="logo/katarina-ketering-logo.png" alt="Partner 4" class="partner-logo" width="167" height="120">
           </a> -->
         </div>
       </div>
@@ -948,7 +950,7 @@
   <script src="js/sezona.js"></script>
   <script src="js/script.js?v=20261027-18"></script>
   <script src="js/home-intro.js?v=20261027-18"></script>
-  <script src="js/hero-lavender.js?v=20261027-18"></script>
+  <script src="js/hero-lavender.js?v=20261027-perf1"></script>
 </body>
 </html>
 
