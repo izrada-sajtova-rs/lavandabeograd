@@ -42,7 +42,7 @@
 
   
   <!-- CSS -->
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=20261027-hero19">
 
 <script type="application/ld+json">
 {
@@ -170,7 +170,7 @@
   gtag('config', 'G-FERK45RCCM');
 </script>
 </head>
-<body>
+<body class="home-page">
   <header class="sticky-header">
     <div class="container header-container">
       <a href="/" class="logo">
@@ -213,7 +213,9 @@
         <a href="tel:+381600409622" class="btn btn-primary pulse-btn trackcall">Pozovite / Poručite</a>
       </div>
       <div class="hero-img">
-        <img src="slike/lavanda-beograd-vezica.webp" width="669" height="373" alt="Vezica sveže lavande - Lavanda Beograd" fetchpriority="high">
+        <div class="hero-lavender">
+          <img class="hero-lavender-base" src="slike/lavanda-beograd-vezica.jpg" width="669" height="373" alt="Vezica sveže lavande - Lavanda Beograd" fetchpriority="high">
+        </div>
       </div>
     </section>
 
@@ -896,7 +898,7 @@
   <div class="bottom-gap"></div>
 
   <!-- Call Button -->
-  <a href="tel:+381600409622" class="call-button trackcall" aria-label="Pozovite nas">
+  <a href="tel:+381600409622" class="call-button trackcall call-after-hero" inert aria-hidden="true" aria-label="Pozovite nas">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
     </svg>
@@ -937,14 +939,16 @@
             <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
           </svg>
         </button>
-        <input type="range" id="volume-slider" min="0" max="1" step="0.1" value="0.7">
+        <input type="range" id="volume-slider" aria-label="Jačina zvuka" min="0" max="1" step="0.1" value="0.7">
       </div>
       <audio id="audio-player" src="audio/lavanda-music.mp3" preload="none"></audio>
     </div>
   </div>
 
   <script src="js/sezona.js"></script>
-  <script src="js/script.js"></script>
+  <script src="js/script.js?v=20261027-18"></script>
+  <script src="js/home-intro.js?v=20261027-18"></script>
+  <script src="js/hero-lavender.js?v=20261027-18"></script>
 </body>
 </html>
 
