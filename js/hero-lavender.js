@@ -4,9 +4,12 @@
   const stage = photo && photo.closest('.hero-lavender');
   const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
   if (!photo || !stage || !stage.classList.contains('is-pending')) return;
+  // Slika se odmah vraća na punu vidljivost (bez prelaza), da ne trepne kad nestane platno.
   const revealPhoto = () => {
-    photo.style.visibility = '';
+    photo.style.transition = 'none';
     stage.classList.remove('is-pending', 'is-forming');
+    void photo.offsetWidth;
+    photo.style.transition = '';
   };
   if (motion.matches) { revealPhoto(); return; }
   const canvas = document.createElement('canvas');
@@ -17,7 +20,6 @@
   if (!gl) { revealPhoto(); return; }
   document.body.append(canvas);
   canvas.hidden = true;
-  photo.style.visibility = 'hidden';
   let frame = 0, done = false, started = false;
   let program, buffer, texture;
   const shaders = [];
@@ -26,13 +28,16 @@
     done = true;
     cancelAnimationFrame(frame);
     revealPhoto();
-    if (buffer) gl.deleteBuffer(buffer);
-    if (texture) gl.deleteTexture(texture);
-    if (program) gl.deleteProgram(program);
-    shaders.forEach(shader => gl.deleteShader(shader));
-    canvas.remove();
-    const lose = gl.getExtension('WEBGL_lose_context');
-    if (lose) lose.loseContext();
+    // Platno se uklanja u sledećem kadru, kada je prava slika već iscrtana ispod njega.
+    requestAnimationFrame(() => {
+      if (buffer) gl.deleteBuffer(buffer);
+      if (texture) gl.deleteTexture(texture);
+      if (program) gl.deleteProgram(program);
+      shaders.forEach(shader => gl.deleteShader(shader));
+      canvas.remove();
+      const lose = gl.getExtension('WEBGL_lose_context');
+      if (lose) lose.loseContext();
+    });
   }
   function shader(type, source) {
     const result = gl.createShader(type);
@@ -46,13 +51,15 @@
     if (done || started) return;
     started = true;
     const bounds = photo.getBoundingClientRect();
-    if (motion.matches || document.hidden || !photo.complete || !photo.naturalWidth ||
+    if (!stage.classList.contains('is-pending') || motion.matches || document.hidden ||
+        !photo.complete || !photo.naturalWidth ||
         !bounds.width || !bounds.height || bounds.bottom <= 0 || bounds.top >= window.innerHeight) {
       finish(); return;
     }
     try {
       const vw = window.innerWidth, vh = window.innerHeight;
-      const dpr = Math.min(window.devicePixelRatio || 1, vw < 768 ? 1.25 : 1.5);
+      // Komadi su u pokretu, pa veća rezolucija platna ne donosi vidljivu razliku.
+      const dpr = 1;
       canvas.style.width = `${vw}px`;
       canvas.style.height = `${vh}px`;
       canvas.width = Math.round(vw * dpr);
@@ -101,7 +108,8 @@
       gl.useProgram(program);
       const cols = 96, rows = 54;
       const cellW = bounds.width / cols, cellH = bounds.height / rows;
-      const rx = cellW * 1.35, ry = cellH * 1.35;
+      // Manje preklapanja komada = manje piksela za crtanje u svakom kadru.
+      const rx = cellW * 1.15, ry = cellH * 1.15;
       const cells = atob('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAD8PgAAAAAAAAAAAAD8//8AAAAMAAAAAAD8//8/AMAcwAAAAADg/v//AOAfwAMAgAMA/v//APAfgP8BwD8M/P//A3Af8P8DgP99/v//P3Ae+P8DAP///////+Oe//8DANj///////////8HAMD///////////8PAMD///////////8PAMD9//////////8HQAD8//////////8P4C/+//////////8f4P////////////8fwP////////////8fgP////////////8fgP////////////8fgP////////////8f4P////////////8f8P////////////8f4P////////////8fAO////////////8fAOD///////////8PAOD///////////8HAPj///////////8BAP7///////////8AAP////////////8AgP///////////z8AgP//////////DwAAgP//////////AQAAgP////////+/AQAAAPz///////8PAAAAAP7///////8DAAAAAPj///////8AAAAAAPj//////38AAAAAAPj//////w8AAAAAAMD//////wAAAAAAAADH////DwAAAAAAAACA////BwAAAAAAAAAA/v/DAAAAAAAAAAAA8P8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
       const pieces = [];
       let seed = 7381;
@@ -165,19 +173,16 @@
       gl.clearColor(0, 0, 0, 0);
       canvas.hidden = false;
       stage.classList.add('is-forming');
-      const duration = 2760;
-      let began, previous = -Infinity;
+      const duration = 1800;
+      let began;
+      // Crta se svaki kadar ekrana: kadar je sada jeftin, a pokret ostaje gladak i na 120 Hz.
       function draw(now) {
         if (done) return;
         if (began === undefined) began = now;
         const progress = Math.min(1, (now - began) / duration);
-        // 30 fps je dovoljno za blag pokret, uz prepolovljen broj GPU kadrova.
-        if (now - previous >= 32 || progress === 1) {
-          previous = now;
-          gl.clear(gl.COLOR_BUFFER_BIT);
-          gl.uniform1f(progressLocation, progress);
-          gl.drawArrays(gl.TRIANGLES, 0, pieces.length * 6);
-        }
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform1f(progressLocation, progress);
+        gl.drawArrays(gl.TRIANGLES, 0, pieces.length * 6);
         if (progress >= 1) frame = requestAnimationFrame(finish);
         else frame = requestAnimationFrame(draw);
       }
@@ -186,8 +191,16 @@
       finish(); // Ako GPU ili tekstura nisu dostupni, prikazi JPG odmah.
     }
   }
-  if (document.readyState === 'complete') start();
-  else window.addEventListener('load', start, { once: true });
+  // Počinje čim je slika učitana i dekodirana, bez čekanja na ostatak stranice.
+  const begin = () => {
+    const ready = photo.decode ? photo.decode().catch(() => {}) : Promise.resolve();
+    ready.then(() => requestAnimationFrame(start));
+  };
+  if (photo.complete && photo.naturalWidth) begin();
+  else {
+    photo.addEventListener('load', begin, { once: true });
+    photo.addEventListener('error', finish, { once: true });
+  }
   window.addEventListener('resize', finish, { passive: true });
   window.addEventListener('scroll', finish, { passive: true });
   motion.addEventListener('change', finish);
