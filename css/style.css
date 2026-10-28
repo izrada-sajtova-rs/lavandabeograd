@@ -420,8 +420,14 @@ i {
   -webkit-tap-highlight-color: transparent;
 }
 /* Platno pokriva vidljivi prozor: latice nisu odsecene granicama fotografije. */
+/* Dok se vezica sklapa, slika ostaje kao bleda silueta: vidljiva je od prvog
+   iscrtavanja (brz LCP), a komadi se slažu preko nje. */
+/* Prelaz samo pri povratku na punu sliku (npr. kad se animacija otkaže skrolovanjem). */
+.hero-lavender:not(.is-pending) .hero-lavender-base {
+  transition: opacity 0.45s ease;
+}
 .hero-lavender.is-pending .hero-lavender-base {
-  visibility: hidden;
+  opacity: 0.1;
 }
 .hero-lavender-canvas {
   position: fixed;
