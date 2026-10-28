@@ -517,8 +517,14 @@ i {
 .about-image {
   flex: 1;
 }
+/* Animacija oblika (border-radius i senka) se crta na procesoru u svakom kadru,
+   pa radi samo dok je slika na ekranu; script.js dodaje klasu .in-view. */
 .about-image img {
   animation: shape 20s infinite;
+  animation-play-state: paused;
+}
+.about-image.in-view img {
+  animation-play-state: running;
   border-right: 13px solid var(--lavender-700);
 }
 
