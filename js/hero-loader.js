@@ -29,7 +29,7 @@
   }
 
   const script = document.createElement('script');
-  script.src = 'js/hero-lavender.js?v=20261028-speed2';
+  script.src = 'js/hero-lavender.js?v=20261028-speed3';
   script.async = true;
   script.onerror = cancel;
   // Ako se animacija ne pokrene na vreme (spora mreža), prikazuje se obična slika.

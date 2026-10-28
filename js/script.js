@@ -23,6 +23,16 @@ document.querySelectorAll('.email-link').forEach(link => {
   link.textContent = address;
 });
 
+// Animacija oblika slike u sekciji "O nama" radi samo dok je slika na ekranu
+const aboutImage = document.querySelector('.about-image');
+if (aboutImage && 'IntersectionObserver' in window) {
+  new IntersectionObserver(entries => {
+    entries.forEach(entry => aboutImage.classList.toggle('in-view', entry.isIntersecting));
+  }).observe(aboutImage);
+} else if (aboutImage) {
+  aboutImage.classList.add('in-view');
+}
+
 // Enter i razmak aktiviraju elemente sa role="button"
 document.querySelectorAll('[role="button"]').forEach(el => {
   el.addEventListener('keydown', function(e) {

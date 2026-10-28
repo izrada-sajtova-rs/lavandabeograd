@@ -15,8 +15,11 @@
   const canvas = document.createElement('canvas');
   canvas.className = 'hero-lavender-canvas';
   canvas.setAttribute('aria-hidden', 'true');
+  // failIfMajorPerformanceCaveat: bez prave grafičke kartice (softversko crtanje na procesoru)
+  // WebGL je spor i blokira stranicu, pa se tada odmah prikazuje obična slika.
   const gl = canvas.getContext('webgl', { alpha: true, antialias: false,
-    depth: false, stencil: false, premultipliedAlpha: true, powerPreference: 'low-power' });
+    depth: false, stencil: false, premultipliedAlpha: true, powerPreference: 'low-power',
+    failIfMajorPerformanceCaveat: true });
   if (!gl) { revealPhoto(); return; }
   document.body.append(canvas);
   canvas.hidden = true;
