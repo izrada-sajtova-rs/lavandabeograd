@@ -216,7 +216,7 @@
       </div>
       <div class="hero-img">
         <div class="hero-lavender">
-          <img class="hero-lavender-base" src="slike/lavanda-beograd-vezica.jpg" srcset="slike/lavanda-beograd-vezica-800.jpg 800w, slike/lavanda-beograd-vezica.jpg 1376w" sizes="(max-width: 767px) 100vw, (max-width: 1338px) 50vw, 669px" width="669" height="373" alt="Vezica sveže lavande - Lavanda Beograd" fetchpriority="high">
+          <img class="hero-lavender-base" src="slike/lavanda-beograd-vezica-800.webp" srcset="slike/lavanda-beograd-vezica-800.webp 800w, slike/lavanda-beograd-vezica-1100.webp 1100w, slike/lavanda-beograd-vezica-1376.webp 1376w" sizes="(max-width: 767px) calc(100vw - 32px), (max-width: 1338px) 50vw, 669px" width="669" height="373" alt="Vezica sveže lavande - Lavanda Beograd" fetchpriority="high">
         </div>
       </div>
     </section>
@@ -947,10 +947,11 @@
     </div>
   </div>
 
-  <script src="js/sezona.js"></script>
-  <script src="js/script.js?v=20261027-18"></script>
-  <script src="js/home-intro.js?v=20261027-speed1"></script>
-  <script src="js/hero-loader.js?v=20261027-speed1"></script>
+  <script src="js/sezona.js" defer></script>
+  <script src="js/script.js?v=20261027-18" defer></script>
+  <script src="js/home-intro.js?v=20261027-speed1" defer></script>
+  <!-- Bez defer: mala skripta koja mora da postavi siluetu pre prvog iscrtavanja -->
+  <script src="js/hero-loader.js?v=20261028-speed2"></script>
 </body>
 </html>
 
