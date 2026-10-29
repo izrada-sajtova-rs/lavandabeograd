@@ -1,4 +1,5 @@
-// Preuzimanje GPU animacije odmah; slika ostaje vidljiva kao bleda silueta dok se vezica sklapa.
+// Slika se učitava normalno, bez animacije. Oko 3,5 s posle učitavanja stranice preuzima se
+// GPU animacija: vezica se razleti u latice, pa se ponovo sklopi.
 (() => {
   const stage = document.querySelector('.hero-lavender');
   const photo = stage && stage.querySelector('.hero-lavender-base');
@@ -12,31 +13,43 @@
     (navigator.hardwareConcurrency && navigator.hardwareConcurrency <= 2);
   if (weakDevice) return;
 
-  let watchdog = 0, cancelled = false;
-  stage.classList.add('is-pending');
+  let timer = 0, cancelled = false, requested = false;
 
   function cancel() {
-    if (cancelled || stage.classList.contains('is-forming')) return;
+    if (requested) return; // Kad animacija krene, ona sama reaguje na skrol.
     cancelled = true;
-    clearTimeout(watchdog);
-    stage.classList.remove('is-pending', 'is-forming');
+    clearTimeout(timer);
   }
 
-  const rect = stage.getBoundingClientRect();
-  if (document.hidden || rect.bottom <= 0 || rect.top >= window.innerHeight) {
-    cancel();
-    return;
+  function load() {
+    if (cancelled || requested) return;
+    const rect = stage.getBoundingClientRect();
+    if (document.hidden || motion.matches || window.scrollY > 80 ||
+        rect.bottom <= 0 || rect.top >= window.innerHeight) {
+      cancel();
+      return;
+    }
+    requested = true;
+    stage.classList.add('is-pending');
+    const script = document.createElement('script');
+    script.src = 'js/hero-lavender.js?v=20261029-burst1';
+    script.async = true;
+    script.onerror = () => stage.classList.remove('is-pending');
+    document.body.append(script);
   }
 
-  const script = document.createElement('script');
-  script.src = 'js/hero-lavender.js?v=20261028-speed3';
-  script.async = true;
-  script.onerror = cancel;
-  // Ako se animacija ne pokrene na vreme (spora mreža), prikazuje se obična slika.
-  watchdog = setTimeout(cancel, 6000);
-  document.body.append(script);
+  function schedule() {
+    if (cancelled) return;
+    timer = setTimeout(() => {
+      // Sačeka i slobodan trenutak pregledača, da ne smeta drugim poslovima.
+      if ('requestIdleCallback' in window) requestIdleCallback(load, { timeout: 1000 });
+      else load();
+    }, 3500);
+  }
 
-  window.addEventListener('scroll', cancel, { passive: true, once: true });
+  if (document.readyState === 'complete') schedule();
+  else window.addEventListener('load', schedule, { once: true });
+  window.addEventListener('scroll', () => { if (window.scrollY > 80) cancel(); }, { passive: true });
   motion.addEventListener('change', cancel);
   document.addEventListener('visibilitychange', () => { if (document.hidden) cancel(); });
 })();
