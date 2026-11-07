@@ -11,6 +11,14 @@ window.addEventListener('load', function() {
   }
 });
 
+// Google mapa se učitava 5,5 s posle učitavanja stranice (pre toga je samo prazan okvir)
+const googleMap = document.getElementById('google-map');
+if (googleMap && googleMap.dataset.src) {
+  const loadMap = () => setTimeout(() => { googleMap.src = googleMap.dataset.src; }, 5500);
+  if (document.readyState === 'complete') loadMap();
+  else window.addEventListener('load', loadMap, { once: true });
+}
+
 // Email adresa se sklapa ovde da ne stoji ispisana u HTML-u
 const contactForm = document.getElementById('contact-form');
 if (contactForm) {
@@ -78,35 +86,28 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
 // Animacija na scroll
 const animateElements = document.querySelectorAll('.animate-on-scroll');
 
-const checkIfInView = () => {
-  const windowHeight = window.innerHeight;
-  const windowTopPosition = window.pageYOffset;
-  const windowBottomPosition = windowTopPosition + windowHeight;
-
-  animateElements.forEach(element => {
-    const elementHeight = element.offsetHeight;
-    const elementTopPosition = element.getBoundingClientRect().top + windowTopPosition;
-    const elementBottomPosition = elementTopPosition + elementHeight;
-    
-    // Dodaj delay ako je specificiran
-    const delay = element.getAttribute('data-delay') || 0;
-    
-    // Proveri da li je element vidljiv
-    if (
-      (elementBottomPosition >= windowTopPosition) &&
-      (elementTopPosition <= windowBottomPosition)
-    ) {
-      setTimeout(() => {
-        element.classList.add('animate');
-      }, delay);
-    }
-  });
+// IntersectionObserver javlja kada element uđe u ekran, bez merenja svih elemenata pri svakom skrolu
+const showElement = element => {
+  // Dodaj delay ako je specificiran
+  const delay = element.getAttribute('data-delay') || 0;
+  setTimeout(() => {
+    element.classList.add('animate');
+  }, delay);
 };
 
-// Inicijalno proveri elemente
-window.addEventListener('load', checkIfInView);
-window.addEventListener('scroll', checkIfInView);
-window.addEventListener('resize', checkIfInView);
+if ('IntersectionObserver' in window) {
+  const appearObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        showElement(entry.target);
+        appearObserver.unobserve(entry.target);
+      }
+    });
+  });
+  animateElements.forEach(element => appearObserver.observe(element));
+} else {
+  animateElements.forEach(showElement);
+}
 
 // Brojači
 const counters = document.querySelectorAll('.counter-number');
@@ -134,22 +135,19 @@ const animateCounters = () => {
   });
 };
 
-// Pokretanje animacije brojača kada su vidljivi
-const startCountersOnScroll = () => {
-  const countersSection = document.querySelector('.counters-section');
-  if (countersSection) {
-    const sectionPosition = countersSection.getBoundingClientRect().top;
-    const screenPosition = window.innerHeight / 1.3;
-    
-    if (sectionPosition < screenPosition) {
+// Pokretanje animacije brojača kada sekcija dođe do ~77% visine ekrana
+const countersSection = document.querySelector('.counters-section');
+if (countersSection && 'IntersectionObserver' in window) {
+  const countersObserver = new IntersectionObserver(entries => {
+    if (entries.some(entry => entry.isIntersecting)) {
       animateCounters();
-      window.removeEventListener('scroll', startCountersOnScroll);
+      countersObserver.disconnect();
     }
-  }
-};
-
-window.addEventListener('scroll', startCountersOnScroll);
-window.addEventListener('load', startCountersOnScroll);
+  }, { rootMargin: '0px 0px -23% 0px' });
+  countersObserver.observe(countersSection);
+} else if (countersSection) {
+  animateCounters();
+}
 
 // Lightbox galerija
 const galleryImages = [

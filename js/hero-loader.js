@@ -32,7 +32,7 @@
     requested = true;
     stage.classList.add('is-pending');
     const script = document.createElement('script');
-    script.src = 'js/hero-lavender.js?v=20261029-burst1';
+    script.src = 'js/hero-lavender.js';
     script.async = true;
     script.onerror = () => stage.classList.remove('is-pending');
     document.body.append(script);
